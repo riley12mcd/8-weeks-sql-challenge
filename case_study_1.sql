@@ -5,15 +5,38 @@ FROM sales s
 JOIN menu m
     ON s.product_id = m.product_id
 GROUP BY s.customer_id
-ORDER BY s.customer_id ASC;
-
+ORDER BY s.customer_id ASC
+;
 
 -- 2. How many days has each customer visited the restaurant?
 
-
-
+SELECT customer_id, COUNT(DISTINCT order_date) AS days_visited
+FROM sales 
+GROUP BY customer_id
+;
 
 -- 3. What was the first item from the menu purchased by each customer?
+
+-- Uses a CTE to find the earliest order date per customer
+-- then joins back to sales and menu tables to retrieve the product
+-- ordered on their first visit.
+-- Returns all items ordered on the customer's first visit date as the data contains no timestamp to determine order sequence.
+
+WITH first_visit AS (
+	SELECT s.customer_id, MIN(s.order_date) AS min_date
+	FROM sales s
+	GROUP BY s.customer_id)
+
+SELECT s.customer_id, m.product_name AS first_dish
+FROM first_visit v
+JOIN sales s
+	ON v.customer_id = s.customer_id
+    AND s.order_date = v.min_date
+JOIN menu m
+    ON s.product_id = m.product_id
+ORDER BY s.customer_id
+;
+
 -- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 -- 5. Which item was the most popular for each customer?
 -- 6. Which item was purchased first by the customer after they became a member?
