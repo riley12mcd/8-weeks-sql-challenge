@@ -38,7 +38,39 @@ ORDER BY s.customer_id
 ;
 
 -- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+
+-- Most purchased item along with number of times ordered.
+
+SELECT m.product_name, COUNT(s.product_id) AS times_ordered
+FROM sales s
+JOIN menu m
+    ON s.product_id = m.product_id
+GROUP BY m.product_name
+ORDER BY times_ordered DESC
+LIMIT 1;
+
 -- 5. Which item was the most popular for each customer?
+
+-- CTE counts when each customer ordered each product.
+-- RANK() window function ranks products per customer by order count descending.
+-- Outer query filters to rank 1 to return only the most ordered item per customer.
+-- Customer B ordered ramen, sushi and curry equally, therefor his result will have all 3 dishes listed.
+
+WITH times_ordered AS (
+    SELECT COUNT(s.product_id) AS product_count,
+           m.product_name,
+           s.customer_id,
+           RANK() OVER (PARTITION BY customer_id ORDER BY COUNT(s.product_id) DESC) AS rank
+    FROM sales s
+    JOIN menu m
+        ON s.product_id = m.product_id
+    GROUP BY s.customer_id, m.product_id, m.product_name
+)
+SELECT product_name, customer_id
+FROM times_ordered
+WHERE rank = 1
+ORDER BY customer_id;
+
 -- 6. Which item was purchased first by the customer after they became a member?
 -- 7. Which item was purchased just before the customer became a member?
 -- 8. What is the total items and amount spent for each member before they became a member?
