@@ -72,6 +72,26 @@ WHERE rank = 1
 ORDER BY customer_id;
 
 -- 6. Which item was purchased first by the customer after they became a member?
+
+-- CTE joins sales, menu, and members tables filtering to orders on or after each customer's join date.
+-- RANK() partitions by customer and orders by date ascending meaning rank 1 = first post-membership order.
+-- Only customers A and B appear as Customer C never joined the membership program.
+
+WITH member_firstorder AS (
+    SELECT 
+        s.customer_id, m.product_name, s.order_date,
+        RANK() OVER (PARTITION BY s.customer_id ORDER BY s.order_date ASC) AS order_rank
+    FROM sales s
+    JOIN menu m
+        ON s.product_id = m.product_id
+    JOIN members mb
+        ON s.customer_id = mb.customer_id
+    WHERE s.order_date >= mb.join_date)
+SELECT customer_id, product_name
+FROM member_firstorder
+WHERE order_rank = 1
+ORDER BY customer_id;
+
 -- 7. Which item was purchased just before the customer became a member?
 -- 8. What is the total items and amount spent for each member before they became a member?
 -- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
