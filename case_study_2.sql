@@ -20,8 +20,28 @@ GROUP BY runner_id
 ORDER BY runner_id;
   
 4. How many of each type of pizza was delivered?
+
+SELECT pizza_id, COUNT(pizza_id) AS total_pizzas
+FROM customer_orders AS co
+JOIN runner_orders AS ro
+    ON co.order_id = ro.order_id
+WHERE cancellation IN ('', 'null') OR cancellation IS NULL
+GROUP BY pizza_id
+ORDER BY pizza_id;
+  
 5. How many Vegetarian and Meatlovers were ordered by each customer?
+
+SELECT co.customer_id, pn.pizza_name, COUNT(co.pizza_id) AS pizzas_ordered
+FROM customer_orders co
+JOIN pizza_names pn
+    ON co.pizza_id = pn.pizza_id
+GROUP BY co.customer_id, pn.pizza_name
+ORDER BY co.customer_id, pn.pizza_name;
+  
 6. What was the maximum number of pizzas delivered in a single order?
+
+
+  
 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
 8. How many pizzas were delivered that had both exclusions and extras?
 9. What was the total volume of pizzas ordered for each hour of the day?
